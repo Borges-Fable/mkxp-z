@@ -321,6 +321,12 @@ $(DOWNLOADS)/ruby/configure: $(DOWNLOADS)/ruby/configure.ac
 $(DOWNLOADS)/ruby/configure.ac:
 	$(CLONE) $(GITHUB)/mkxp-z/ruby $(DOWNLOADS)/ruby --single-branch -b mkxp-z-3.1.3 --depth 1;
 	sed -i '' '/: $${PRELOADENV=DYLD_INSERT_LIBRARIES}/g' $(DOWNLOADS)/ruby/configure.ac
+	# Extensions are linked in statically, never as bundles with a loader program
+	perl -pi -e 's/EXTDLDFLAGS="-bundle_loader [^"]*"/:/' $(DOWNLOADS)/ruby/configure.ac
+	! grep -q bundle_loader $(DOWNLOADS)/ruby/configure.ac
+	# That workaround reads the build Mac's /usr/include, not the iOS SDK; the SDK header needs no fixing
+	perl -pi -e 's|if /darwin/ =~ RUBY_PLATFORM and !try_compile|if false and !try_compile|' $(DOWNLOADS)/ruby/ext/socket/extconf.rb
+	grep -q 'if false and !try_compile' $(DOWNLOADS)/ruby/ext/socket/extconf.rb
 
 # ====
 init_dirs:
