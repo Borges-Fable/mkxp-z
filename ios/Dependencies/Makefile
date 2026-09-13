@@ -68,7 +68,6 @@ RUBY_CONFIGURE_ARGS := \
 	--disable-install-doc \
 	--disable-dtrace \
 	--with-coroutine=arm64 \
-	ac_cv_func_fork=no ac_cv_func_vfork=no ac_cv_func_posix_spawn=no \
 	ac_cv_func_getentropy=no ac_cv_func_syscall=no ac_cv_func___syscall=no \
 	ac_cv_header_mach_o_loader_h=no
 
