@@ -38,7 +38,6 @@ cpp_link_args = [$flags, '-L$PREFIX/lib']
 [properties]
 needs_exe_wrapper = true
 pkg_config_libdir = '$PREFIX/lib/pkgconfig'
-sys_root = '$SDK'
 
 [host_machine]
 system = 'darwin'
