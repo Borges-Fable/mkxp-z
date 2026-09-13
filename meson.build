@@ -2,7 +2,8 @@ project('mkxp-z', 'c', 'cpp', version: '2.4.2', meson_version: '>=0.56.0', defau
 
 host_system = host_machine.system()
 
-if host_system == 'darwin'
+ios = get_option('ios')
+if host_system == 'darwin' and not ios
     error('\nThis Meson project no longer supports macOS. Please use the Xcode project instead.')
 endif
 
@@ -109,7 +110,7 @@ if get_option('force32') == true
 endif
 
 build_static = false
-if get_option('static_executable') == true
+if get_option('static_executable') == true or ios
     build_static = true
 endif
 
@@ -124,7 +125,10 @@ global_include_dirs += include_directories('src', 'binding')
 
 rpath = ''
 
-if host_system == 'windows'
+if ios
+    # The app bundle is assembled by ios/make_app.sh
+    global_args += '-DMKXPZ_IOS'
+elif host_system == 'windows'
     windows_resource_directory = '../' + get_option('windows_resource_directory')
     subdir('windows')
     global_sources += windows_resources

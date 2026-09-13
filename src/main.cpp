@@ -215,7 +215,30 @@ static void setupWindowIcon(const Config &conf, SDL_Window *win) {
   }
 }
 
+#ifdef MKXPZ_IOS
+// There is no console on a phone. Send stdout/stderr to Documents/mkxp-z.log,
+// which the Files app can open (UIFileSharingEnabled in Info.plist).
+static void redirectLogToDocuments() {
+  const char *home = getenv("HOME");
+  if (!home)
+    return;
+  std::string path = std::string(home) + "/Documents/mkxp-z.log";
+  if (freopen(path.c_str(), "w", stdout))
+    setvbuf(stdout, NULL, _IOLBF, 0);
+  if (freopen(path.c_str(), "a", stderr))
+    setvbuf(stderr, NULL, _IONBF, 0);
+}
+#endif
+
 int main(int argc, char *argv[]) {
+#ifdef MKXPZ_IOS
+    redirectLogToDocuments();
+    SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
+    // Apple gives secondary threads 512 KB of stack; Ruby runs on the RGSS thread
+    // and Essentials recurses deeply ("stack level too deep" otherwise)
+    SDL_SetHint(SDL_HINT_THREAD_STACK_SIZE, "67108864");
+    SDL_SetHint(SDL_HINT_IOS_HIDE_HOME_INDICATOR, "2");
+#endif
     SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
     SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
 

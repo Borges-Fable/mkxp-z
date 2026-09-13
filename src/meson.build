@@ -22,9 +22,14 @@ uchardet = dependency('uchardet', static: build_static)
 # building the sub project.
 # It looks like upstream SDL_image fixed this for SDL3, so we can hopefully
 # remove this workaround after eventually upgrading to SDL3.
+if ios
+    # Built without JXL and without pkg-config/cmake metadata that survives cross-compiling
+    sdl2_image = compilers['cpp'].find_library('SDL2_image')
+else
 sdl2_image = dependency('SDL2_image', modules: ['SDL2_image::SDL2_image-static', 'SDL2_image::brotlidec-static', 'SDL2_image::brotlicommon-static', 'SDL2_image::hwy', 'SDL2_image::jxl_dec-static'], static: build_static, method: 'cmake', required: false)
 if sdl2_image.found() == false
     sdl2_image = dependency('SDL2_image', modules: ['SDL2_image::SDL2_image-static', 'SDL2_image::brotlidec-static', 'SDL2_image::brotlicommon-static', 'SDL2_image::hwy', 'SDL2_image::jxl_dec-static'], static: build_static)
+endif
 endif
 
 if host_system == 'windows'
@@ -59,7 +64,9 @@ if host_system == 'windows'
     explicit_libs += 'libmsvcrt;libgcc;libmingwex;libgmp;'
 endif
 if build_static == true
-    if host_system == 'windows'
+    if ios
+        # Apple's toolchain has no libgcc to link statically
+    elif host_system == 'windows'
         # '-static-libgcc', '-static-libstdc++' are here to avoid needing to ship a separate libgcc_s_seh-1.dll on Windows; it still works without those flags if you have the dll.
         global_link_args += ['-static-libgcc', '-static-libstdc++', '-Wl,-Bstatic', '-lgcc', '-lstdc++', '-lpthread', '-Wl,-Bdynamic']
     else
@@ -99,6 +106,15 @@ global_include_dirs += include_directories('.',
 global_dependencies += [openal, zlib, bz2, sdl2, sdl_sound, pixman, physfs, theora, vorbisfile, vorbis, ogg, sdl2_ttf, freetype, sdl2_image, png, iconv, uchardet]
 if host_system == 'windows'
     global_dependencies += compilers['cpp'].find_library('wsock32')
+endif
+
+if ios
+    global_dependencies += compilers['cpp'].find_library('SDL2main')
+    foreach fw : ['UIKit', 'Foundation', 'CoreGraphics', 'QuartzCore', 'OpenGLES', 'Metal',
+                  'CoreAudio', 'AudioToolbox', 'AVFoundation', 'CoreVideo', 'CoreMotion',
+                  'GameController', 'CoreHaptics', 'CoreBluetooth', 'Security', 'CoreFoundation']
+        global_link_args += ['-framework', fw]
+    endforeach
 endif
 
 if get_option('shared_fluid') == true

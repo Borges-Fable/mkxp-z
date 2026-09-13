@@ -687,9 +687,14 @@ RB_METHOD_GUARD(mkxpLaunch) {
 #endif
     }
     
+#ifdef MKXPZ_IOS
+    // iOS apps cannot run shell commands
+    throw Exception(Exception::MKXPError, "Failed to launch \"%s\"", RSTRING_PTR(cmdname));
+#else
     if (std::system(command.c_str()) != 0) {
         throw Exception(Exception::MKXPError, "Failed to launch \"%s\"", RSTRING_PTR(cmdname));
     }
+#endif
     
     return RUBY_Qnil;
 }

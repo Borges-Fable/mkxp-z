@@ -74,4 +74,6 @@ DerivedData/
 !default.perspectivev3
 
 ## Gcc Patch
-/*.gcno
+/*.gcnoios/build/
+ios/Dependencies/build-iphoneos-*/
+ios/Dependencies/downloads/

@@ -101,5 +101,9 @@ std::string filesystemImpl::getDefaultGameRoot() {
     char *p = SDL_GetBasePath();
     std::string ret(p);
     SDL_free(p);
+#ifdef MKXPZ_IOS
+    // The bundle root holds the executable and Info.plist; the game sits beside them
+    ret += "Game/";
+#endif
     return ret;
 }

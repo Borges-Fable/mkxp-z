@@ -1,0 +1,79 @@
+name: iOS
+
+on:
+  push:
+    branches: ['ios']
+    paths-ignore: ['*.md']
+  workflow_dispatch:
+    inputs:
+      clean:
+        description: 'Dependencies to rebuild from scratch (space-separated download dir names, e.g. "ruby sdl2"), or "all"'
+        required: false
+        default: ''
+
+jobs:
+  build-ios:
+    name: iOS arm64 (unsigned)
+    runs-on: macos-26
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install build tools
+        run: brew install autoconf automake libtool meson
+
+      # Saved even when the build fails, so a failing dependency does not
+      # force every earlier one to rebuild on the next run.
+      - name: Restore dependency cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ios/Dependencies/build-iphoneos-arm64
+            ios/Dependencies/downloads
+          key: ios-deps-${{ github.run_id }}
+          restore-keys: ios-deps-
+
+      - name: Clean requested dependencies
+        if: ${{ github.event.inputs.clean != '' }}
+        run: |
+          cd ios/Dependencies
+          if [ "${{ github.event.inputs.clean }}" = all ]; then
+            rm -rf build-iphoneos-arm64 downloads
+          else
+            for d in ${{ github.event.inputs.clean }}; do rm -rf "downloads/iphoneos/$d"; done
+          fi
+
+      # Serial on purpose: sibling prerequisites race under make -j.
+      - name: Build dependencies
+        run: make -C ios/Dependencies
+
+      - name: Save dependency cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ios/Dependencies/build-iphoneos-arm64
+            ios/Dependencies/downloads
+          key: ios-deps-${{ github.run_id }}
+
+      - name: Build app
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: bash ios/build.sh
+
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-logs
+          path: |
+            ios/build/meson/meson-logs
+            ios/Dependencies/downloads/iphoneos/*/config.log
+            ios/Dependencies/downloads/iphoneos/*/cmakebuild/CMakeFiles/CMakeError.log
+            ios/Dependencies/downloads/iphoneos/*/cmakebuild/CMakeFiles/CMakeConfigureLog.yaml
+          if-no-files-found: ignore
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mkxp-z-ios-unsigned
+          path: ios/build/mkxp-z-unsigned.ipa

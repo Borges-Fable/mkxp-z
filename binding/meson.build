@@ -12,6 +12,11 @@ else
     global_dependencies += compilers['cpp'].find_library(get_option('mri_library'), dirs: get_option('mri_libpath'))
 endif
 
+if ios
+    # Statically linked extensions and encodings (see ios/Dependencies/Makefile)
+    global_link_args += '-Wl,-force_load,' + get_option('mri_libpath') + '/libruby-ext.a'
+endif
+
 global_include_dirs += include_directories('.')
 
 binding_source = [files(

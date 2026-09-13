@@ -355,7 +355,7 @@ try { exp } catch (...) {}
     // Determine whether to open a console window on... Windows
     winConsole = getEnvironmentBool("MKXPZ_WINDOWS_CONSOLE", editor.debug);
     
-#ifdef __APPLE__
+#if defined(__APPLE__) && !defined(MKXPZ_IOS)
     // Determine whether to use the Metal renderer on macOS
     // Environment variable takes priority over the json setting
     preferMetalRenderer = isMetalSupported() && getEnvironmentBool("MKXPZ_MACOS_METAL", preferMetalRenderer);
