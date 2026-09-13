@@ -69,7 +69,8 @@ RUBY_CONFIGURE_ARGS := \
 	--disable-dtrace \
 	--with-coroutine=arm64 \
 	ac_cv_func_fork=no ac_cv_func_vfork=no ac_cv_func_posix_spawn=no \
-	ac_cv_func_getentropy=no ac_cv_func_syscall=no ac_cv_func___syscall=no
+	ac_cv_func_getentropy=no ac_cv_func_syscall=no ac_cv_func___syscall=no \
+	ac_cv_header_mach_o_loader_h=no
 
 CONFIGURE := $(CONFIGURE_ENV) ./configure $(CONFIGURE_ARGS)
 AUTOGEN   := $(CONFIGURE_ENV) ./autogen.sh $(CONFIGURE_ARGS)
@@ -307,11 +308,12 @@ $(LIBDIR)/libruby-ext.a: $(DOWNLOADS)/ruby/Makefile
 	rm -f $@; \
 	libtool -static -o $@ ext/extinit.o $$(find ext -name '*.a' -not -path '*/-test-/*') enc/libenc.a enc/libtrans.a
 
-# -std=gnu99 because Ruby 3.1.3 is not valid C23.
+# -std=gnu99 because Ruby 3.1.3 is not valid C23. compat/ holds headers the iOS SDK lacks.
+# mach_o_loader_h=no skips the crash-report symbolizer, which needs <crt_externs.h>.
 $(DOWNLOADS)/ruby/Makefile: $(DOWNLOADS)/ruby/configure
 	cd $(DOWNLOADS)/ruby; \
 	export $(CONFIGURE_ENV); \
-	export CFLAGS="-std=gnu99 -DRUBY_FUNCTION_NAME_STRING=__func__ $(CFLAGS)"; \
+	export CFLAGS="-std=gnu99 -DRUBY_FUNCTION_NAME_STRING=__func__ -I$(CURDIR)/compat $(CFLAGS)"; \
 	./configure $(CONFIGURE_ARGS) $(RUBY_CONFIGURE_ARGS)
 
 $(DOWNLOADS)/ruby/configure: $(DOWNLOADS)/ruby/configure.ac
