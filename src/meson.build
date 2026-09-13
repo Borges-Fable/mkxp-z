@@ -176,7 +176,9 @@ main_source = files(
     'net/LUrlParser.cpp',
     'net/net.cpp',
 
-    'system/systemImpl.cpp'
+    'system/systemImpl.cpp',
+
+    'libretro/libretro-host.cpp'
 )
 
 global_sources += main_source

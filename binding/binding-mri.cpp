@@ -106,6 +106,7 @@ void CUSLBindingInit();
 #endif
 
 void httpBindingInit();
+void libretroBindingInit();
 
 RB_METHOD(mkxpDelta);
 RB_METHOD(mriPrint);
@@ -189,6 +190,7 @@ static void mriBindingInit() {
 #endif
     
     httpBindingInit();
+    libretroBindingInit();
     
     if (rgssVer >= 3) {
         _rb_define_module_function(rb_mKernel, "rgss_main", mriRgssMain);
