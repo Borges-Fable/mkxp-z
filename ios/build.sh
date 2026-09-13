@@ -48,6 +48,11 @@ cpu = 'arm64'
 endian = 'little'
 EOF
 
+# The SDK has libz but no zlib.pc, and libpng.pc requires one
+SDK_ZLIB_VERSION=$(sed -n 's/^#define ZLIB_VERSION "\(.*\)"/\1/p' "$SDK/usr/include/zlib.h")
+printf 'Name: zlib\nDescription: zlib from the iOS SDK\nVersion: %s\nLibs: -lz\nCflags:\n' \
+  "$SDK_ZLIB_VERSION" > "$PREFIX/lib/pkgconfig/zlib.pc"
+
 export PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig"
 export PKG_CONFIG_SYSROOT_DIR=""
 
