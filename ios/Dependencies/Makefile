@@ -17,15 +17,17 @@ RBUILD := x86_64-apple-darwin
 
 TARGETFLAGS := -arch $(ARCH) -isysroot $(SDK) -miphoneos-version-min=$(MINIMUM_REQUIRED)
 DEPLOYMENT_TARGET_ENV := IPHONEOS_DEPLOYMENT_TARGET=$(MINIMUM_REQUIRED)
-BUILD_PREFIX := ${PWD}/build-iphoneos-$(ARCH)
+BUILD_PREFIX := $(CURDIR)/build-iphoneos-$(ARCH)
 LIBDIR := $(BUILD_PREFIX)/lib
 INCLUDEDIR := $(BUILD_PREFIX)/include
-DOWNLOADS := ${PWD}/downloads/iphoneos
+DOWNLOADS := $(CURDIR)/downloads/iphoneos
 NPROC := $(shell sysctl -n hw.ncpu)
 CFLAGS := -I$(INCLUDEDIR) -I$(INCLUDEDIR)/freetype2 $(TARGETFLAGS) -O3
 LDFLAGS := -L$(LIBDIR) $(TARGETFLAGS)
-CC      := $(shell xcrun --sdk iphoneos -f clang)
-CXX     := $(shell xcrun --sdk iphoneos -f clang++)
+# Target flags live in CC itself: some builds run the preprocessor (clang -E)
+# without CFLAGS, which then finds no SDK headers at all.
+CC      := $(shell xcrun --sdk iphoneos -f clang) $(TARGETFLAGS)
+CXX     := $(shell xcrun --sdk iphoneos -f clang++) $(TARGETFLAGS)
 PKG_CONFIG_LIBDIR := $(BUILD_PREFIX)/lib/pkgconfig
 GIT := git
 CLONE := $(GIT) clone -q
@@ -212,12 +214,11 @@ $(DOWNLOADS)/sdl2_image/cmakebuild/Makefile: $(DOWNLOADS)/sdl2_image/CMakeLists.
 	$(CMAKE) \
 	-DSDL2IMAGE_JPG_SAVE=yes \
 	-DSDL2IMAGE_PNG_SAVE=yes \
-	-DSDL2IMAGE_PNG_SHARED=no \
-	-DSDL2IMAGE_JPG_SHARED=no \
-	-DSDL2IMAGE_JXL=yes \
-	-DSDL2IMAGE_JXL_SHARED=no \
+	-DSDL2IMAGE_JXL=no \
+	-DSDL2IMAGE_AVIF=no \
+	-DSDL2IMAGE_WEBP=no \
+	-DSDL2IMAGE_TIF=no \
 	-DSDL2IMAGE_BACKEND_IMAGEIO=no \
-	-DSDL2IMAGE_BACKEND_STB=no \
 	-DSDL2IMAGE_SAMPLES=no \
 	-DSDL2IMAGE_VENDORED=yes
 
