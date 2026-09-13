@@ -247,9 +247,14 @@ $(DOWNLOADS)/sdl_sound/CMakeLists.txt:
 # SDL2 (ttf)
 sdl2ttf: init_dirs sdl2 freetype $(LIBDIR)/libSDL2_ttf.a
 
+# SDL_ttf's old libtool copies the static libSDL2.a into libSDL2_ttf.a as a
+# nested archive, which leaves no usable members. Re-pack its one object.
 $(LIBDIR)/libSDL2_ttf.a: $(DOWNLOADS)/sdl2_ttf/Makefile
 	cd $(DOWNLOADS)/sdl2_ttf; \
 	make -j$(NPROC); make install
+	rm -f $@
+	libtool -static -o $@ $(DOWNLOADS)/sdl2_ttf/SDL_ttf.o
+	nm -g $@ | grep -q ' T _TTF_Init'
 
 $(DOWNLOADS)/sdl2_ttf/Makefile: $(DOWNLOADS)/sdl2_ttf/configure
 	cd $(DOWNLOADS)/sdl2_ttf; \
