@@ -55,19 +55,22 @@ printf 'Name: zlib\nDescription: zlib from the iOS SDK\nVersion: %s\nLibs: -lz\n
 export PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig"
 export PKG_CONFIG_SYSROOT_DIR=""
 
-rm -rf "$OUT/meson"
-meson setup "$OUT/meson" --cross-file "$OUT/cross.ini" \
+# One level below the source root: xxd names the embedded assets after their
+# relative path, and the sources expect ___assets_icon_png (../assets/icon.png)
+MESON_DIR="$PWD/build-ios"
+rm -rf "$MESON_DIR"
+meson setup "$MESON_DIR" --cross-file "$OUT/cross.ini" \
   -Dios=true \
   -Dgfx_backend=gles \
   -Dshared_fluid=false \
   -Denable-https=false \
   -Dmri_libpath="$PREFIX/lib"
-ninja -C "$OUT/meson"
+ninja -C "$MESON_DIR"
 
 APP="$OUT/Payload/mkxp-z.app"
 rm -rf "$OUT/Payload"
 mkdir -p "$APP/Game"
-cp "$OUT/meson/mkxp-z" "$APP/mkxp-z"
+cp "$MESON_DIR/mkxp-z" "$APP/mkxp-z"
 "$(tool strip)" -x "$APP/mkxp-z"
 cp ios/README-Game.txt "$APP/Game/README.txt"
 

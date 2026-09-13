@@ -77,3 +77,4 @@ DerivedData/
 /*.gcnoios/build/
 ios/Dependencies/build-iphoneos-*/
 ios/Dependencies/downloads/
+build-ios/

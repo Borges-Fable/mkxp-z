@@ -67,7 +67,7 @@ jobs:
         with:
           name: ios-logs
           path: |
-            ios/build/meson/meson-logs
+            build-ios/meson-logs
             ios/Dependencies/downloads/iphoneos/*/config.log
             ios/Dependencies/downloads/iphoneos/*/cmakebuild/CMakeFiles/CMakeError.log
             ios/Dependencies/downloads/iphoneos/*/cmakebuild/CMakeFiles/CMakeConfigureLog.yaml
