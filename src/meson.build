@@ -113,7 +113,8 @@ if ios
     foreach fw : ['UIKit', 'Foundation', 'CoreGraphics', 'QuartzCore', 'OpenGLES', 'Metal',
                   'CoreAudio', 'AudioToolbox', 'AVFoundation', 'CoreVideo', 'CoreMotion',
                   'GameController', 'CoreHaptics', 'CoreBluetooth', 'Security', 'CoreFoundation']
-        global_link_args += ['-framework', fw]
+        # One argument per framework: meson de-duplicates repeated '-framework'
+        global_link_args += '-Wl,-framework,' + fw
     endforeach
 endif
 

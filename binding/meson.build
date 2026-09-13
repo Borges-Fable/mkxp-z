@@ -15,6 +15,12 @@ endif
 if ios
     # Statically linked extensions and encodings (see ios/Dependencies/Makefile)
     global_link_args += '-Wl,-force_load,' + get_option('mri_libpath') + '/libruby-ext.a'
+    # ruby-3.1.pc of a --disable-shared cross build names no library to link
+    libruby_static = compilers['cpp'].find_library('ruby.3.1-static', dirs: get_option('mri_libpath'), required: false)
+    if not libruby_static.found()
+        libruby_static = compilers['cpp'].find_library('ruby-static', dirs: get_option('mri_libpath'))
+    endif
+    global_dependencies += libruby_static
 endif
 
 global_include_dirs += include_directories('.')

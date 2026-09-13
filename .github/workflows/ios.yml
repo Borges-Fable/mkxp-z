@@ -61,6 +61,17 @@ jobs:
           BUILD_NUMBER: ${{ github.run_number }}
         run: bash ios/build.sh
 
+      - name: Diagnose link inputs
+        if: failure()
+        run: |
+          cd ios/Dependencies/build-iphoneos-arm64/lib
+          ls -la
+          cat pkgconfig/ruby-3.1.pc || true
+          cat pkgconfig/SDL2_ttf.pc || true
+          lipo -info libSDL2_ttf.a || true
+          ar -t libSDL2_ttf.a || true
+          nm -g libSDL2_ttf.a | grep -i " T _TTF_Init\| U \| T " | head -20 || true
+
       - name: Upload build logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
