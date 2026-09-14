@@ -29,6 +29,15 @@
 
 #include "libretro/libretro-host.h"
 
+/* RB_METHOD_GUARD arrived in mkxp-z after 2.4.2/c9378cf. Every C++ call in the
+ * guarded bodies below already goes through GFX_GUARD_EXC, so on this base the
+ * guard is only the method wrapper. */
+#ifndef RB_METHOD_GUARD
+#define RB_METHOD_GUARD(name) RB_METHOD(name) {
+#define RB_METHOD_GUARD_END return Qnil; }
+#endif
+
+
 DECL_TYPE(Bitmap);
 void bitmapInitProps(Bitmap *b, VALUE self);
 

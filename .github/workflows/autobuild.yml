@@ -34,7 +34,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: actions/cache@v4
+      - uses: actions/cache/restore@v4
+        id: windeps
         with:
           path: |
             windows/build-mingw64
@@ -53,6 +54,15 @@ jobs:
         run: |
           cd windows
           make
+
+      # saved right after the deps, so a failing engine build does not throw away ~45 min of deps
+      - uses: actions/cache/save@v4
+        if: steps.windeps.outputs.cache-hit != 'true'
+        with:
+          path: |
+            windows/build-mingw64
+            windows/downloads
+          key: win-${{ hashFiles('windows/Makefile') }}
 
       - name: Build exe
         shell: msys2 {0}
