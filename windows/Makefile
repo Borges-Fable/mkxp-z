@@ -16,13 +16,14 @@ DOWNLOADS := ${PWD}/downloads/$(ARCH)
 NPROC := $(shell nproc)
 CFLAGS := -I$(INCLUDEDIR) -O3
 LDFLAGS := -L$(LIBDIR)
-CC      := gcc
+CC      := gcc -std=gnu17
 PKG_CONFIG_LIBDIR := $(BUILD_PREFIX)/lib/pkgconfig
 GIT := git
 CLONE := $(GIT) clone -q
 GITHUB := https://github.com
 
 CONFIGURE_ENV := \
+	CMAKE_POLICY_VERSION_MINIMUM=3.5 \
 	PKG_CONFIG_LIBDIR=$(PKG_CONFIG_LIBDIR) \
 	CC="$(CC)" CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"
 

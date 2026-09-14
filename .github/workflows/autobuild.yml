@@ -43,6 +43,8 @@ jobs:
 
       - name: Build all dependencies
         shell: msys2 {0}
+        env:
+          CMAKE_POLICY_VERSION_MINIMUM: '3.5'
         run: |
           cd windows
           make
@@ -76,6 +78,34 @@ jobs:
             build/artifact/*.exe
             build/artifact/mkxp.json
             build/artifact/stdlib/
+
+  build-quicknes-windows:
+    name: QuickNES core (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: mingw64
+          install: >-
+            base-devel
+            git
+            mingw-w64-x86_64-gcc
+
+      - name: Build quicknes_libretro.dll
+        shell: msys2 {0}
+        run: |
+          git clone -q https://github.com/libretro/QuickNES_Core
+          cd QuickNES_Core
+          git checkout -q 26bb785c9deddb66a17717b21bb4e328f03ade32
+          make -j$(nproc) platform=win LDFLAGS=-static
+          strip quicknes_libretro.dll
+          ldd quicknes_libretro.dll
+          objdump -p quicknes_libretro.dll | grep 'DLL Name'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quicknes_libretro.windows-26bb785
+          path: QuickNES_Core/quicknes_libretro.dll
 
   build-linux:
     name: Ubuntu 22.04
