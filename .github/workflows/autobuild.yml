@@ -5,6 +5,7 @@ on:
   push:
     branches: ['dev', 'autobuild']
     paths-ignore: ['*.md', '*.json', '*.png']
+  workflow_dispatch:
 
 jobs:
   build-windows:
@@ -31,9 +32,9 @@ jobs:
 
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             windows/build-mingw64
@@ -50,7 +51,7 @@ jobs:
         shell: msys2 {0}
         run: |
           source windows/vars.sh
-          meson build
+          meson setup build
           cd build
           ninja
           strip ./mkxp-z.exe
@@ -67,7 +68,7 @@ jobs:
           cp ../mkxp-z.exe .
           cp ../../mkxp.json .
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: mkxp-z.windows.${{github.ref_name}}-${{steps.short-sha.outputs.sha}}
           path: |
@@ -78,6 +79,7 @@ jobs:
 
   build-linux:
     name: Ubuntu 22.04
+    if: github.event_name == 'push'
     runs-on: ubuntu-22.04
     steps:
       - uses: benjlevesque/short-sha@v2.2
@@ -86,9 +88,9 @@ jobs:
           length: 7
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             linux/build-x86_64
@@ -120,13 +122,14 @@ jobs:
           cd ..
           zip -r local.zip local
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: mkxp-z.linux.${{github.ref_name}}-${{steps.short-sha.outputs.sha}}
           path: build/local.zip
 
   build-macos:
     name: macOS
+    if: github.event_name == 'push'
     runs-on: macos-latest
     steps:
       - uses: benjlevesque/short-sha@v2.2
@@ -138,9 +141,9 @@ jobs:
         run: brew remove --force $(brew list)
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             macos/Dependencies/build-macosx-x86_64
@@ -170,7 +173,7 @@ jobs:
           ditto -c -k --sequesterRsrc --keepParent Z-universal.app Z-universal.app.zip
 
       - name: Upload archive
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mkxp-z.macos.${{github.ref_name}}-${{steps.short-sha.outputs.sha}}
           path: build/Build/Products/Release/Z-universal.app.zip
