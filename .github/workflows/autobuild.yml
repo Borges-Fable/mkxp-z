@@ -45,6 +45,11 @@ jobs:
         shell: msys2 {0}
         env:
           CMAKE_POLICY_VERSION_MINIMUM: '3.5'
+          # GCC 13+ no longer pulls <cstdint> in transitively (openal-soft fork)
+          CXXFLAGS: '-include cstdint'
+          # set in the environment so make exports its CC (gcc -std=gnu17) to
+          # recipes that do not use CONFIGURE_ENV, e.g. OpenSSL's Configure
+          CC: gcc
         run: |
           cd windows
           make
